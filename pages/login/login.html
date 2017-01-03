@@ -1,0 +1,29 @@
+<div id="login">
+    <form id='login-form' role="form" accept-charset="UTF-8">
+
+        <div class="form-group">
+            <label for="server-url">Mustard URL</label>
+            <input type='text' class="form-control" id="server-url" placeholder="Mustard Server URL">
+        </div>
+
+        <div id="user-pass-error" class="error">Incorrect Username or Password. Please try again</div>
+
+        <div id="unknown-error" class="error">An unknown error has occured. Please check your URL and try again.</div>
+
+        <div class="form-group">
+            <label for="server-username">Username</label>
+            <input type='text' id="server-username" class="form-control" placeholder="Username">
+        </div>
+
+        <div class="form-group">
+            <label for="server-password">Password</label>
+            <input type='password' id="server-password" class="form-control" placeholder="Password">
+        </div>
+
+
+        <div class="form-group">
+            <input type="submit" name="commit" value="Login" class="btn btn-primary" data-disable-with="Submit">
+        </div>
+    </form>
+</div>
+
