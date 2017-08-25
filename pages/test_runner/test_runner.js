@@ -152,14 +152,22 @@ $(document).on('/pages/test_runner/test_runner', function(){
 
         //Get Next Test
         keyword_text = '';
-        filter.map(function(a){keyword_text += "keyword[]=" + a + "&"});
+        if(!filter==null){
+            filter.map(function(a){keyword_text += "keyword[]=" + a + "&"});
+        }
+
 
         //Set Environment
-        environment_text = 'environment=' + env + '&'
+        environment_text = ''
+        // alert(env==null)
+        if(!env==null){
+            environment_text = 'environment=' + env + '&'
+        }
+        // environ?ment_text = 'environment=' + env + '&'
         $.ajax({
             type: "GET",
 
-            url: filter && filter != 'All' ? mustard_url + '/executions/' + execution_id + '/next_test?' + environment_text + keyword_text : mustard_url + '/executions/' + execution_id + '/next_test?' + environment_text,
+            url: !filter==null && filter != 'All' ? mustard_url + '/executions/' + execution_id + '/next_test?' + environment_text + keyword_text : mustard_url + '/executions/' + execution_id + '/next_test?' + environment_text,
             contentType: "application/json; charset=utf-8",
             beforeSend: function (request)
             {
