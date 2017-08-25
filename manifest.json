@@ -3,7 +3,7 @@
 
   "name": "Mustard Results",
   "description": "This extension will allow easy manual testing with the Mustard Results server",
-  "version": "0.1",
+  "version": "0.6",
   "icons": { "16": "img/mustard_icon_16.png",
     "19": "img/mustard_icon_19.png",
     "38": "img/mustard_icon_38.png",

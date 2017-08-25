@@ -42,12 +42,12 @@ $(document).on('/pages/login/login', function(){
             }
         }).done(function(r){
             $('.loading-overlay').hide();
-            chrome.storage.sync.set({'mustard_token': r.token}, function(){
+            chrome.storage.sync.set({'mustard_token': r.user.token}, function(){
                 console.log('Set Token to Storage')
             });
-            chrome.storage.sync.set({'mustard_first_name': r.first_name}, function(){
+            chrome.storage.sync.set({'mustard_first_name': r.user.first_name}, function(){
                 console.log('Set FirstName to Storage')
-                $('#user-first-name').text(r.first_name);
+                $('#user-first-name').text(r.user.first_name);
             });
             navigate_to_route("/pages/projects/projects");
         });

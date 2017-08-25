@@ -16,9 +16,9 @@ document.addEventListener('DOMContentLoaded', function() {
             return false;
         }).done(function(r){
             if (r.Error){
-                return false
+                navigate_to_route(root_route)
             } else {
-                callback()
+                callback();
             }
         });
 

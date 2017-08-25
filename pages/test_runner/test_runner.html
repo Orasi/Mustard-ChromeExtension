@@ -1,70 +1,117 @@
 <div id="test_runner_modal_content">
-    <h5>
-        <div id="testcase_name"></div>
-        <div class="small pull-right back-btn">
-            Back to Projects
-        </div>
+
+    <h5 class="no-tests" style="display:none">
+        No tests found for current project
     </h5>
-    <h5 class="no-tests"> No tests found for current project</h5>
+    <h5 class="no-tests-slow" style="display:none">
+        No tests found for current environment
+    </h5>
+    <div class="main-content">
+        <h5>
+            <table>
+                <tr>
+                    <td width="70%" style="word-wrap: break-word">
+                        <div style='margin-top:5px' class="small back-btn">
+                            Back to Projects
+                        </div>
+                        <div class="hide-slow" id="testcase_name_area">
+                            <div id="testcase_name"></div>
 
-    <div id="testcase-area">
-        <div class="panel panel-default">
-            <div class="panel-body">
+                        </div>
+
+                    </td>
+                    <td class="hide-slow" width="250px">
+                        <div style='margin-bottom:5px' class="small">Keyword</div>
+                        <select class='keyword_select' multiple='multiple' name="keyword" id="keyword" aria-hidden="true" style="width:250px">
+                        </select>
+                    </td>
+                </tr>
+            </table>
 
 
-                <table class="table table-striped table-hover table-condensed">
-                    <tbody><tr>
-                        <td></td>
-                        <th>
-                            Step Action
-                        </th>
-                        <th>
-                            Expected Result
-                        </th>
-                    </tr>
+        </h5>
 
 
-                    </tbody></table>
-            </div>
-        </div>
-        <h5 class="error required-status">Status is required</h5>
-        <h5 class="error required-comment">Comment is required for failures</h5>
 
-        <form id='testcase-form' role="form" accept-charset="UTF-8">
-            <div class="form-group">
-                <div class="pull-right">
-                    <input id='add-screenshot' type="checkbox" name="result[screenshot]" value=true> Add Screenshot
+        <div id="testcase-area">
+            <div class="panel panel-default">
+                <div class="panel-body hide-slow">
+
+
+                    <table class="table table-striped table-hover table-condensed">
+                        <tbody>
+                        <tr>
+                            <td></td>
+                            <th>
+                                Step Action
+                            </th>
+                            <th>
+                                Expected Result
+                            </th>
+                        </tr>
+
+
+                        </tbody>
+                    </table>
                 </div>
+            </div>
+            <h5 class="error required-status">Status is required</h5>
+            <h5 class="error required-comment">Comment is required for failures</h5>
 
-                <input type="hidden" name="result[environment_id]" id="result_environment_id">
-                <input type="hidden" name="result[testcase_id]" id="result_testcase_id">
-                <input type="hidden" name="result[execution_id]" id="result_execution_id">
-                <input type="hidden" name="result[result_type]" id="result_result_type">
-                <label>Status</label>
-                <br>
+            <form id='testcase-form' role="form" accept-charset="UTF-8">
+                <table width="100%">
+
+                    <tr>
+                        <td>
+                            <div class="form-group">
+                                <label>Environment</label>
+                                <select name="result[environment_id]" id="result_environment_id" aria-hidden="true"
+                                        style="width:300px">
+                                </select>
+                            </div>
+
+                        </td>
+                        <td>
+                            <div class="hide-slow pull-right">
+                                <input id='add-screenshot' type="checkbox" name="result[screenshot]" value=true> Add
+                                Screenshot
+                            </div>
+
+                        </td>
+                    </tr>
+                </table>
+                <div class="form-group hide-slow">
+
+                    <input type="hidden" name="result[testcase_id]" id="result_testcase_id">
+                    <input type="hidden" name="result[execution_id]" id="result_execution_id">
+                    <input type="hidden" name="result[result_type]" id="result_result_type">
+                    <input type="hidden" name="result[fast_execution]" id="fast_execution">
+                    <label>Status</label>
+                    <br>
             <span style="margin:15px">
                 <label for="Pass">Pass</label>
                 <input class='result-status' type="radio" name="result[status]" id="result_status_pass" value="pass">
             </span>
-            <span style="margin:15px">
+                    <span style="margin:15px">
                 <label for="Fail">Fail</label>
                 <input class='result-status' type="radio" name="result[status]" id="result_status_fail" value="fail">
             </span>
-            <span style="margin:15px">
+                    <span style="margin:15px">
                 <label for="Skip">Skip</label>
                 <input class='result-status' type="radio" name="result[status]" id="result_status_skip" value="skip">
             </span>
-            </div>
-            <div class="form-group">
-                <label>Comment</label>
-                <input type="text" name="result[comment]" id="result_comment" class="form-control">
-            </div>
-            <div class="form-group">
-                <input type="submit" name="commit" value="Submit" class="btn btn-primary" data-disable-with="Submit">
-            </div>
-        </form>
+                </div>
+                <div class="form-group hide-slow">
+                    <label>Comment</label>
+                    <input type="text" name="result[comment]" id="result_comment" class="form-control">
+                </div>
+                <div class="form-group hide-slow">
+                    <input type="submit" name="commit" value="Submit" class="btn btn-primary" data-disable-with="Submit">
+                </div>
+            </form>
+        </div>
+
+
     </div>
-
-
 
 </div>

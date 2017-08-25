@@ -26,7 +26,9 @@ $(document).on('/pages/projects/projects', function(){
                 placeholder: 'Select Projects',
                 width: '100%',
                 data: $.map(r.projects, function(val, i){
-                    return {id: val.execution_id, text: val.project_name}
+                    // alert(val.fast_execution)
+                    // alert(JSON.stringify(val));
+                    return {id: val.execution_id, text: val.project_name, speed: val.fast_execution}
                 })
 
             });
@@ -35,7 +37,9 @@ $(document).on('/pages/projects/projects', function(){
 
     $('#test_runner').click(function(){
         if ($('#select-projects').val()) {
+            fast = $('#select-projects').find(':selected').data('data').speed
             chrome.storage.sync.set({'mustard_execution_id': $('#select-projects').val()});
+            chrome.storage.sync.set({'mustard_fast_execution': fast});
             chrome.storage.sync.set({"mustard_test_expire": Date()});
             navigate_to_route('/pages/test_runner/test_runner');
         } else {

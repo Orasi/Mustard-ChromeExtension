@@ -1,34 +1,60 @@
 $(document).on('/pages/test_runner/test_runner', function(){
+    root_route = '/pages/login/login';
+
+    login_token_valid = function(url, token){
+        $.ajax({
+            type: "GET",
+            url: url + '/users/token/valid',
+            contentType: "application/json; charset=utf-8",
+            beforeSend: function (request)
+            {
+                request.setRequestHeader("User-Token", token);
+            }
+        }).fail(function(r) {
+            return false;
+        }).done(function(r){
+            if (r.Error){
+                navigate_to_route(root_route)
+            }
+        });
+
+    };
 
     add_test_to_page = function(test){
         $('#testcase_name').text(test.name);
 
-        $("#result_environment_id").val(-1);
+
         $("#result_testcase_id").val(test.validation_id);
         $("#result_execution_id").val(execution_id);
         $("#result_result_type").val("manual");
+
+
 
         $( "#testcase-form" ).unbind('submit').bind('submit', function( event ) {
             submit_form();
             event.preventDefault();
         });
 
-        test.reproduction_steps.forEach(function(step){
-            action = 'Some Action';
-            expected_result = 'Some Expected Result';
-            $('.table tr:last').after("<tr class='test-step-row'><td>" +
-                step.step_number + ". </td><td>" +
-                step.action + "</td><td>" +
-                step.step_number + ".  " + step.result + "</td></tr>");
-        });
+        if (test.reproduction_steps){
+            test.reproduction_steps.forEach(function(step){
 
+                $('.table tr:last').after("<tr class='test-step-row'><td>" +
+                    step.step_number + ". </td><td>" +
+                    step.action + "</td><td>" +
+                    step.step_number + ".  " + step.result + "</td></tr>");
+            });
+        }
+
+        $('.no-tests').hide();
+        $('.no-tests-slow').hide();
     };
 
-    get_next_test = function(callback){
-        //Get Next Test
+    get_environments = function(project_id){
+
         $.ajax({
             type: "GET",
-            url: mustard_url + '/executions/' + execution_id + '/next_test',
+            async: false,
+            url: mustard_url + '/projects/' + project_id + '/environments',
             contentType: "application/json; charset=utf-8",
             beforeSend: function (request)
             {
@@ -38,43 +64,209 @@ $(document).on('/pages/test_runner/test_runner', function(){
             $('.loading-overlay').hide();
 
         }).done(function(r){
-
-            if ( r.testcase =='No remaining testcases' ){
+            if ( r.environments == [] ){
                 $('#testcase-area').hide();
                 $('.no-tests').show();
-                chrome.storage.sync.set({"mustard_test_expire": Date()});
+
+                if(!$("#fast_execution").val()){
+                    $('.hide-slow').hide();
+                }
+                chrome.storage.sync.set({"mustard_environments": []});
             } else {
+                $('.no-tests').hide();
+                $('.hide-slow').show();
+                //Set Test as current test
+                chrome.storage.sync.set({"mustard_environments": r.environments});
+                update_environments(r.environments, $("#result_environment_id").val())
+            }
+        });
+    };
+
+    update_environments = function(environments, selected_environment){
+        select = $("select#result_environment_id");
+        init_select = $("select#environment_select_init");
+        select.empty();
+        init_select.empty();
+        environments.forEach(function(e){
+            select.append( $("<option>")
+                .val(e.uuid)
+                .html(e.display_name ? e.display_name : e.uuid)
+            );
+            init_select.append( $("<option>")
+                .val(e.uuid)
+                .html(e.display_name ? e.display_name : e.uuid)
+            );
+        });
+        select.val(selected_environment)
+    };
+
+    get_keywords = function(project_id){
+
+        $.ajax({
+            type: "GET",
+            async: false,
+            url: mustard_url + '/projects/' + project_id + '/keywords',
+            contentType: "application/json; charset=utf-8",
+            beforeSend: function (request)
+            {
+                request.setRequestHeader("User-Token", mustard_token);
+            }
+        }).fail(function(r) {
+            $('.loading-overlay').hide();
+
+        }).done(function(r){
+            if ( r.keywords == [] ){
+                $('#testcase-area').hide();
+                $('.no-tests').show();
+
+                if(!$("#fast_execution").val()){
+                    $('.hide-slow').hide();
+                }
+                chrome.storage.sync.set({"mustard_keywords": []});
+            } else {
+                $('.hide-slow').show();
+                //Set Test as current test
+                chrome.storage.sync.set({"mustard_keywords": r.keywords});
+                update_keywords(r.keywords, keyword)
+            }
+        });
+    };
+
+    update_keywords = function(keywords, selected_keyword){
+        select = $("select#keyword");
+        select.empty();
+
+        keywords.forEach(function(e){
+            select.append( $("<option>")
+                .val(e.keyword)
+                .html(e.keyword)
+            );
+        });
+        select.val(selected_keyword)
+    };
+
+
+    get_next_test = function(callback, filter, env){
+
+        filter = filter || false;
+
+        //Get Next Test
+        keyword_text = '';
+        filter.map(function(a){keyword_text += "keyword[]=" + a + "&"});
+
+        //Set Environment
+        environment_text = 'environment=' + env + '&'
+        $.ajax({
+            type: "GET",
+
+            url: filter && filter != 'All' ? mustard_url + '/executions/' + execution_id + '/next_test?' + environment_text + keyword_text : mustard_url + '/executions/' + execution_id + '/next_test?' + environment_text,
+            contentType: "application/json; charset=utf-8",
+            beforeSend: function (request)
+            {
+                request.setRequestHeader("User-Token", mustard_token);
+            }
+        }).fail(function(r) {
+            $('.loading-overlay').hide();
+        }).done(function(r){
+
+            if ( r.testcase =='No remaining testcases' ){
+
+
+
+                if(!$("#fast_execution").val()){
+                    $('.hide-slow').hide();
+                    $('.no-tests-slow').show();
+                }else{
+                    $('.no-tests').show();
+                    $('#testcase-area').hide();
+                    $('#testcase_name_area').hide();
+                }
+                chrome.storage.sync.set({"mustard_test_expire": Date()});
+                chrome.storage.sync.set({"mustard_current_test": null});
+
+            } else {
+                $('.hide-slow').show();
+                // $('.main-content').show()
+                // $('.environment_selection').hide()
+                $('#testcase-area').show();
+                $('#testcase_name_area').show();
+                $('.no-tests').hide();
+                $('.no-tests-slow').hide();
 
                 var d = new Date();
                 d.setMinutes(d.getMinutes() + 5);
 
                 //Set Test as current test
                 chrome.storage.sync.set({"mustard_current_test": r.testcase});
+                chrome.storage.sync.set({"mustard_project_id": r.testcase.project_id});
                 chrome.storage.sync.set({"mustard_test_expire": d});
-
+                get_environments(r.testcase.project_id);
+                get_keywords(r.testcase.project_id);
                 callback(r.testcase);
+                $('.no-tests').hide();
+                $('.no-tests-slow').hide();
             }
         });
     };
 
 
-    chrome.storage.sync.get(['mustard_execution_id', 'mustard_current_test', 'mustard_test_expire', 'mustard_url', 'mustard_token'], function (result) {
-
+    chrome.storage.sync.get(['mustard_execution_id', 'mustard_current_test', 'mustard_test_expire', 'mustard_url', 'mustard_token', 'mustard_environments', 'mustard_environment_id','mustard_keywords', 'mustard_current_keyword', 'mustard_fast_execution'], function (result) {
+        login_token_valid( result.mustard_url, result.mustard_token)
         mustard_url = result.mustard_url;
         mustard_token = result.mustard_token;
         execution_id= result.mustard_execution_id;
+        selected_env= result.mustard_environment_id;
+        environments = result.mustard_environments;
+        keyword = result.mustard_current_keyword;
+        keywords = result.mustard_keywords;
+        fast_execution = result.mustard_fast_execution;
+        $("#fast_execution").val(fast_execution);
 
+
+        $('.no-tests').hide();
 
         if ( result.mustard_current_test && result.mustard_test_expire && result.mustard_test_expire > Date() ){
             add_test_to_page(result.mustard_current_test)
         } else {
-            get_next_test(add_test_to_page);
+            get_next_test(add_test_to_page, keyword, selected_env);
         }
-    });
 
+        if (environments && environments != []){
+            update_environments(environments, selected_env);
+        }
+
+        if (keywords && keywords != []){
+            update_keywords(keywords, keyword);
+        }
+
+        $('#keyword').change(function(o){
+            keyword = $(this).val();
+            chrome.storage.sync.set({"mustard_current_keyword": keyword});
+            get_next_test(add_test_to_page, keyword, selected_env);
+        });
+
+        $('#result_environment_id').change(function(o){
+           environment = $(this).val();
+
+           chrome.storage.sync.set({"mustard_environment_id": environment});
+            $("#result_environment_id").val(environment);
+           if(!$("#fast_execution").val()){
+               get_next_test(add_test_to_page, [], environment)
+           }
+
+        });
+
+        $('.keyword_select').select2({ width: '100%'})
+        $('#result_environment_id').select2()
+        $('#environment_select_init').select2()
+    });
 
     $('.back-btn').click(function(){
         navigate_to_route('/pages/projects/projects')
+    });
+
+    $('#init_environment').click(function(){
+        get_next_test(add_test_to_page, [], $('#environment_select_init').val());
     });
 
     clear_page = function(){
@@ -138,7 +330,7 @@ $(document).on('/pages/test_runner/test_runner', function(){
         }).done(function(r){
             $('.loading-overlay').show();
             clear_page();
-            get_next_test(add_test_to_page);
+            get_next_test(add_test_to_page, keyword, env_id);
             $('.loading-overlay').hide();
         })
     };
@@ -150,6 +342,11 @@ $(document).on('/pages/test_runner/test_runner', function(){
         r_type = $("#result_result_type").val();
         comment = $('#result_comment').val();
         status = $('.result-status:checked').val() ;
+        keyword = $('#keyword').val() ;
+
+        chrome.storage.sync.set({"mustard_environment_id": env_id});
+        chrome.storage.sync.set({"mustard_current_keyword": keyword});
+        selected_env = env_id;
 
         if( status == 'undefined'){
             $('.required-status').show();
@@ -172,5 +369,13 @@ $(document).on('/pages/test_runner/test_runner', function(){
 
 
         }
-    }
+    };
+
+    $('#keyword-btn').click(function(){
+        $('#keyword-btn').fadeOut('slow', function(){
+            $('#keyword-area').fadeIn();
+        });
+    });
+
+
 });
