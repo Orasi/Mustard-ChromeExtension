@@ -28,7 +28,7 @@ $(document).on('/pages/projects/projects', function(){
                 data: $.map(r.projects, function(val, i){
                     // alert(val.fast_execution)
                     // alert(JSON.stringify(val));
-                    return {id: val.execution_id, text: val.project_name, speed: val.fast_execution}
+                    return {id: val.execution_id, text: val.project_name, speed: val.fast_execution, project_id: val.id}
                 })
 
             });
@@ -38,9 +38,13 @@ $(document).on('/pages/projects/projects', function(){
     $('#test_runner').click(function(){
         if ($('#select-projects').val()) {
             fast = $('#select-projects').find(':selected').data('data').speed
+            project_id = $('#select-projects').find(':selected').data('data').project_id
             chrome.storage.sync.set({'mustard_execution_id': $('#select-projects').val()});
             chrome.storage.sync.set({'mustard_fast_execution': fast});
+            chrome.storage.sync.set({'mustard_project_id': project_id});
             chrome.storage.sync.set({"mustard_test_expire": Date()});
+            chrome.storage.sync.set({"mustard_environment_id": null});
+
             navigate_to_route('/pages/test_runner/test_runner');
         } else {
             $('.project-error').show()

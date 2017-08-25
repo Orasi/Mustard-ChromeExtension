@@ -74,7 +74,7 @@ $(document).on('/pages/test_runner/test_runner', function(){
                 chrome.storage.sync.set({"mustard_environments": []});
             } else {
                 $('.no-tests').hide();
-                $('.hide-slow').show();
+                // $('.hide-slow').show();
                 //Set Test as current test
                 chrome.storage.sync.set({"mustard_environments": r.environments});
                 update_environments(r.environments, $("#result_environment_id").val())
@@ -152,22 +152,20 @@ $(document).on('/pages/test_runner/test_runner', function(){
 
         //Get Next Test
         keyword_text = '';
-        if(!filter==null){
+        if(!(filter == null) && filter){
             filter.map(function(a){keyword_text += "keyword[]=" + a + "&"});
         }
 
 
         //Set Environment
         environment_text = ''
-        // alert(env==null)
-        if(!env==null){
+        if(!(env == null)){
             environment_text = 'environment=' + env + '&'
         }
-        // environ?ment_text = 'environment=' + env + '&'
         $.ajax({
             type: "GET",
 
-            url: !filter==null && filter != 'All' ? mustard_url + '/executions/' + execution_id + '/next_test?' + environment_text + keyword_text : mustard_url + '/executions/' + execution_id + '/next_test?' + environment_text,
+            url: !(filter == null) && filter != 'All' ? mustard_url + '/executions/' + execution_id + '/next_test?' + environment_text + keyword_text : mustard_url + '/executions/' + execution_id + '/next_test?' + environment_text,
             contentType: "application/json; charset=utf-8",
             beforeSend: function (request)
             {
@@ -218,8 +216,9 @@ $(document).on('/pages/test_runner/test_runner', function(){
     };
 
 
-    chrome.storage.sync.get(['mustard_execution_id', 'mustard_current_test', 'mustard_test_expire', 'mustard_url', 'mustard_token', 'mustard_environments', 'mustard_environment_id','mustard_keywords', 'mustard_current_keyword', 'mustard_fast_execution'], function (result) {
+    chrome.storage.sync.get(['mustard_project_id', 'mustard_execution_id', 'mustard_current_test', 'mustard_test_expire', 'mustard_url', 'mustard_token', 'mustard_environments', 'mustard_environment_id','mustard_keywords', 'mustard_current_keyword', 'mustard_fast_execution'], function (result) {
         login_token_valid( result.mustard_url, result.mustard_token)
+        project_id = result.mustard_project_id
         mustard_url = result.mustard_url;
         mustard_token = result.mustard_token;
         execution_id= result.mustard_execution_id;
@@ -228,16 +227,23 @@ $(document).on('/pages/test_runner/test_runner', function(){
         keyword = result.mustard_current_keyword;
         keywords = result.mustard_keywords;
         fast_execution = result.mustard_fast_execution;
+
         $("#fast_execution").val(fast_execution);
-
-
         $('.no-tests').hide();
 
-        if ( result.mustard_current_test && result.mustard_test_expire && result.mustard_test_expire > Date() ){
-            add_test_to_page(result.mustard_current_test)
-        } else {
-            get_next_test(add_test_to_page, keyword, selected_env);
+        if(!selected_env && !fast_execution){
+            alert('here')
+            $('.hide-slow').hide();
+            get_environments(project_id);
+        }else{
+            if ( result.mustard_current_test && result.mustard_test_expire && result.mustard_test_expire > Date() ){
+                add_test_to_page(result.mustard_current_test)
+            } else {
+                get_next_test(add_test_to_page, keyword, selected_env);
+            }
         }
+
+
 
         if (environments && environments != []){
             update_environments(environments, selected_env);
